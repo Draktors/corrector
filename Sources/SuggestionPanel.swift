@@ -46,7 +46,7 @@ final class SuggestionPanel {
         p.orderFrontRegardless()
         panel = p
 
-        HotKeys.shared.register(keyCode: kVK_Return, modifiers: optionKey) { [weak self] in self?.onAccept?() }
+        HotKeys.shared.register(keyCode: kVK_Return, modifiers: cmdKey) { [weak self] in self?.onAccept?() }
         HotKeys.shared.register(keyCode: kVK_Escape, modifiers: 0) { [weak self] in self?.onDismiss?() }
         hideTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: false) { [weak self] _ in
             MainActor.assumeIsolated { self?.onDismiss?() }
@@ -124,7 +124,7 @@ private struct SuggestionView: View {
             }
             .frame(maxHeight: 170)
             HStack {
-                Text("⌥ ⏎ remplacer · Échap ignorer").font(.caption).foregroundStyle(.secondary)
+                Text("⌘ ⏎ remplacer · Échap ignorer").font(.caption).foregroundStyle(.secondary)
                 Spacer()
                 Button("Remplacer", action: onAccept).buttonStyle(.borderedProminent).controlSize(.small)
             }

@@ -1,7 +1,7 @@
 import Carbon
 
 /// Raccourcis clavier globaux.
-/// - « temporaires » : actifs seulement pendant que la bulle est affichée (⌥⏎, Échap) ;
+/// - « temporaires » : actifs seulement pendant que la bulle est affichée (⌘⏎, Échap) ;
 /// - « permanents » : toujours actifs (ouvrir le menu de l'app).
 @MainActor
 final class HotKeys {
