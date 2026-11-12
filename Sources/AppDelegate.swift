@@ -252,6 +252,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         login.state = SMAppService.mainApp.status == .enabled ? .on : .off
         menu.addItem(login)
 
+        if Updater.sourceDir != nil {
+            menu.addItem(.separator())
+            if Updater.isRunning {
+                let busy = NSMenuItem(title: "Mise à jour en cours…", action: nil, keyEquivalent: "")
+                busy.isEnabled = false
+                menu.addItem(busy)
+            } else {
+                menu.addItem(item("Mettre à jour (git pull + recompiler)", #selector(update)))
+            }
+        }
+
         menu.addItem(.separator())
         let hint = NSMenuItem(title: "Astuce : ⌃⌥⌘C ouvre ce menu n'importe où", action: nil, keyEquivalent: "")
         hint.isEnabled = false
@@ -343,6 +354,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func openAccessibilitySettings() {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
+    }
+
+    @objc private func update() {
+        setStatus(.checking)
+        Updater.run { [weak self] in
+            self?.setStatus(Settings.enabled ? .idle : .disabled)
+            self?.rebuildMenu()
+        }
+        rebuildMenu()
     }
 
     @objc private func quit() { NSApp.terminate(nil) }

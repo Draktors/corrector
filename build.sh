@@ -11,8 +11,14 @@ swiftc -O -swift-version 5 -target arm64-apple-macos26.0 \
     Sources/*.swift -o "$APP/Contents/MacOS/Correcteur"
 
 cp Info.plist "$APP/Contents/Info.plist"
-# Exigence de signature fixée sur l'identifiant : macOS garde l'autorisation Accessibilité d'une compilation à l'autre.
-codesign --force --sign - -r='designated => identifier "com.local.correcteur"' "$APP"
+SIGN=(codesign --force --sign - -r='designated => identifier "com.local.correcteur"')
 
+# Version à partager : sans le chemin du code sur ce Mac (pas de menu « Mettre à jour »).
+"${SIGN[@]}" "$APP"
 (cd build && ditto -c -k --keepParent Correcteur.app Correcteur.zip)
+
+# Version locale : note le dossier du code, pour le menu « Mettre à jour (git pull + recompiler) ».
+/usr/libexec/PlistBuddy -c "Add :CorrecteurSourceDir string $(pwd)" "$APP/Contents/Info.plist"
+# Exigence de signature fixée sur l'identifiant : macOS garde l'autorisation Accessibilité d'une compilation à l'autre.
+"${SIGN[@]}" "$APP"
 echo "OK -> $(pwd)/$APP"
