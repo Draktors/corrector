@@ -68,6 +68,7 @@ final class ClaudeCodeClient {
             worker = w
         }
         spare = nil // chaque processus ne sert qu'une fois (pas d'historique entre deux messages)
+        prewarm()   // on prépare tout de suite le suivant (ligne suivante, ou prochaine pause)
 
         let message: [String: Any] = [
             "type": "user",
