@@ -12,8 +12,18 @@ enum WordDiff {
         s.split(whereSeparator: { $0 == " " || $0 == "\n" }).map(String.init)
     }
 
+    /// Mots + retours à la ligne (chaque "\n" est un élément à part, pour les afficher dans la bulle).
+    static func tokens(_ s: String) -> [String] {
+        var out: [String] = []
+        for (i, line) in s.components(separatedBy: "\n").enumerated() {
+            if i > 0 { out.append("\n") }
+            out += line.split(separator: " ").map(String.init)
+        }
+        return out
+    }
+
     static func segments(from original: String, to corrected: String) -> [DiffSegment] {
-        let old = words(original), new = words(corrected)
+        let old = tokens(original), new = tokens(corrected)
         var removed = Set<Int>(), inserted = Set<Int>()
         for change in new.difference(from: old) {
             switch change {

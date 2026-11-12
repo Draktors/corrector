@@ -90,17 +90,27 @@ private struct SuggestionView: View {
 
     private var diffText: Text {
         var result = Text("")
-        for (i, seg) in segments.enumerated() {
+        var atLineStart = true
+        for seg in segments {
+            let isBreak = seg.text == "\n"
             let part: Text
-            switch seg.kind {
-            case .same:
+            switch (seg.kind, isBreak) {
+            case (.same, true), (.added, true):
+                part = Text("\n")
+            case (.removed, true):
+                // Retour à la ligne supprimé : on le signale au lieu de le faire disparaître en silence.
+                part = Text("⏎").foregroundStyle(.red.opacity(0.7))
+            case (.same, false):
                 part = Text(seg.text)
-            case .removed:
+            case (.removed, false):
                 part = Text(seg.text).strikethrough(true, color: .red).foregroundStyle(.red.opacity(0.7))
-            case .added:
+            case (.added, false):
                 part = Text(seg.text).bold().foregroundStyle(Color(nsColor: .systemGreen))
             }
-            result = i == 0 ? part : Text("\(result) \(part)")
+            // Un espace entre deux mots, mais pas en début de ligne ni autour d'un retour à la ligne.
+            let separator = (atLineStart || (isBreak && seg.kind != .removed)) ? "" : " "
+            result = Text("\(result)\(separator)\(part)")
+            atLineStart = isBreak && seg.kind != .removed
         }
         return result
     }
