@@ -1,6 +1,6 @@
 # Correcteur
 
-Petite app pour la barre de menus du Mac, pensée pour les personnes dyslexiques ou toute personne qui fait des fautes en tapant vite.
+Petite app pour la barre de menus du Mac, pensée pour toute personne qui fait des fautes en tapant vite.
 
 Elle repère quand tu écris. Dès que tu t'arrêtes de taper (0,5 s par défaut), elle relit ton texte et propose une correction : orthographe, fautes de frappe, grammaire, conjugaison, accords, apostrophes oubliées (jai → j'ai), homophones (a/à, sa/ça, ces/ses, on/ont…).
 
