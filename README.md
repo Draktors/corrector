@@ -75,7 +75,9 @@ Il faut **Xcode 26** (App Store), ou au moins ses outils en ligne de commande po
 
 3. Passe à [Premier lancement](#premier-lancement).
 
-Pour mettre à jour plus tard : `git pull`, `./build.sh`, puis relance l'app (menu → Quitter, puis `open`). L'autorisation Accessibilité est conservée.
+Pour mettre à jour plus tard : menu → **Mettre à jour (git pull + recompiler)**. L'app récupère la dernière version, la recompile, remplace l'app installée et se relance toute seule. L'autorisation Accessibilité est conservée.
+
+À la main, ça revient à : `git pull`, `./build.sh`, puis relancer l'app (menu → Quitter, puis `open`).
 
 ### Premier lancement
 
@@ -103,6 +105,7 @@ Pour faire réapparaître l'icône, maintiens **⌘** et fais-la glisser vers la
   - le **modèle**, séparément pour Claude Code (Haiku par défaut) et pour la clé API (Opus par défaut). Haiku est le plus rapide et le moins cher, Opus le plus puissant, Sonnet entre les deux ;
   - **Ajouter / modifier la clé API Claude** : la clé est rangée dans le Trousseau macOS. Pour la supprimer, vide le champ et enregistre.
 - **Lancer au démarrage du Mac**.
+- **Mettre à jour (git pull + recompiler)** : seulement si l'app a été compilée depuis le code source (option B). Récupère la dernière version sur GitHub, recompile, puis relance l'app. En cas d'échec (pas de connexion, modifications locales dans le dossier du code…), une fenêtre montre l'erreur ; le détail est dans `~/Library/Logs/Correcteur-update.log`.
 
 ## Ce que veut dire l'icône
 
@@ -151,7 +154,7 @@ Il faut Xcode 26 (ou ses outils en ligne de commande pour macOS 26), puis :
 open build/Correcteur.app
 ```
 
-`./build.sh` compile `build/Correcteur.app` et crée `build/Correcteur.zip`, le fichier à partager. Pour relancer après une recompilation, quitte l'ancienne instance d'abord (menu → Quitter, ou `pkill -x Correcteur`). La signature est fixée sur l'identifiant de l'app (`com.local.correcteur`) : l'autorisation Accessibilité est conservée d'une compilation à l'autre.
+`./build.sh` compile `build/Correcteur.app` et crée `build/Correcteur.zip`, le fichier à partager. L'app locale garde le chemin du dossier du code (clé `CorrecteurSourceDir` de son `Info.plist`) pour le menu « Mettre à jour » ; la version du zip ne l'a pas. Pour relancer après une recompilation, quitte l'ancienne instance d'abord (menu → Quitter, ou `pkill -x Correcteur`). La signature est fixée sur l'identifiant de l'app (`com.local.correcteur`) : l'autorisation Accessibilité est conservée d'une compilation à l'autre.
 
 | Fichier | Rôle |
 |---|---|
@@ -163,3 +166,4 @@ open build/Correcteur.app
 | `Sources/SuggestionPanel.swift` | bulle de correction et raccourcis |
 | `Sources/AppDelegate.swift` | barre de menus, réglages, enchaînement des étapes |
 | `Sources/WordDiff.swift` | différence mot à mot affichée dans la bulle |
+| `Sources/Updater.swift` | menu « Mettre à jour » : `git pull`, `./build.sh`, relance |
