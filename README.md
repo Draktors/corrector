@@ -37,12 +37,53 @@ En mode **Automatique** (par défaut), l'app prend la clé API si tu en as ajout
 
 ## Installation
 
+Deux façons de l'installer : à partir du zip qu'on t'a envoyé, ou en compilant le code depuis GitHub.
+
+### Option A : à partir de `Correcteur.zip`
+
 1. Dézippe `Correcteur.zip` et glisse **Correcteur.app** dans le dossier **Applications**.
 2. Double-clique dessus. macOS va dire qu'il ne peut pas vérifier l'app, parce qu'elle n'est pas distribuée sur l'App Store. Va dans **Réglages Système → Confidentialité et sécurité**, descends tout en bas, puis clique sur **« Ouvrir quand même »**.
-3. macOS demande l'autorisation **Accessibilité** : clique sur « Ouvrir les Réglages Système » et active **Correcteur**. C'est ce qui permet à l'app de lire et de corriger le texte que tu tapes. Elle se relance toute seule une fois l'autorisation donnée.
-4. Une icône apparaît dans la barre de menus. C'est prêt.
+3. Passe à [Premier lancement](#premier-lancement).
 
-Dans le menu, coche **« Lancer au démarrage du Mac »** pour ne plus avoir à y penser.
+### Option B : depuis le code source
+
+Il faut **Xcode 26** (App Store), ou au moins ses outils en ligne de commande pour macOS 26 (`xcode-select --install`).
+
+1. Récupère le code et compile l'app :
+
+   ```bash
+   git clone git@github.com:Draktors/corrector.git
+   cd corrector
+   ./build.sh
+   ```
+
+   L'app compilée se trouve dans `build/Correcteur.app`.
+
+2. Lance-la :
+
+   ```bash
+   open build/Correcteur.app
+   ```
+
+   Pour l'installer pour de bon, copie-la plutôt dans Applications puis lance-la depuis là :
+
+   ```bash
+   cp -R build/Correcteur.app /Applications/ && open /Applications/Correcteur.app
+   ```
+
+   Une app compilée sur ton Mac n'est pas bloquée par macOS : pas besoin de « Ouvrir quand même ».
+
+3. Passe à [Premier lancement](#premier-lancement).
+
+Pour mettre à jour plus tard : `git pull`, `./build.sh`, puis relance l'app (menu → Quitter, puis `open`). L'autorisation Accessibilité est conservée.
+
+### Premier lancement
+
+1. macOS demande l'autorisation **Accessibilité** : clique sur « Ouvrir les Réglages Système » et active **Correcteur**. C'est ce qui permet à l'app de lire et de corriger le texte que tu tapes. Elle se relance toute seule une fois l'autorisation donnée.
+2. Une icône apparaît dans la barre de menus. C'est prêt : tape une phrase avec des fautes dans Notes ou TextEdit et arrête-toi une seconde, la bulle apparaît.
+3. Dans le menu, coche **« Lancer au démarrage du Mac »** pour ne plus avoir à y penser.
+
+Pour utiliser **Claude Code** comme moteur, il doit être installé et connecté à ton compte Claude ([claude.com/claude-code](https://claude.com/claude-code)), puis il faut relancer Correcteur. Sinon, l'app utilise Apple Intelligence.
 
 ## Le menu
 
@@ -103,13 +144,14 @@ Le journal de diagnostic est dans `~/Library/Logs/Correcteur.log`. Il note chaqu
 
 ## Pour le développeur
 
-Il faut Xcode (ou ses outils en ligne de commande), puis :
+Il faut Xcode 26 (ou ses outils en ligne de commande pour macOS 26), puis :
 
 ```bash
 ./build.sh
+open build/Correcteur.app
 ```
 
-Ça compile `build/Correcteur.app` et crée `build/Correcteur.zip`, le fichier à partager. La signature est fixée sur l'identifiant de l'app (`com.local.correcteur`) : l'autorisation Accessibilité est conservée d'une compilation à l'autre.
+`./build.sh` compile `build/Correcteur.app` et crée `build/Correcteur.zip`, le fichier à partager. Pour relancer après une recompilation, quitte l'ancienne instance d'abord (menu → Quitter, ou `pkill -x Correcteur`). La signature est fixée sur l'identifiant de l'app (`com.local.correcteur`) : l'autorisation Accessibilité est conservée d'une compilation à l'autre.
 
 | Fichier | Rôle |
 |---|---|
