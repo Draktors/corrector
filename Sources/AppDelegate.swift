@@ -15,6 +15,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var lastHandled: String?
     private var pending: (field: FocusedField, original: String, corrected: String)?
     private var trustTimer: Timer?
+    /// Pendant que la bulle attend, vérifie que l'utilisateur est toujours dans le champ corrigé.
+    private var followTimer: Timer?
+    /// Empêche macOS de mettre l'app en veille (App Nap) entre la frappe et l'affichage de la correction :
+    /// une app de barre de menus en arrière-plan voit sinon ses minuteurs et ses lectures ralentis.
+    private var activity: NSObjectProtocol?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -25,10 +30,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         NSWorkspace.shared.notificationCenter.addObserver(
             forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main
-        ) { note in
+        ) { [weak self] note in
             if let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication {
                 AXText.enableAccessibility(for: app.processIdentifier)
             }
+            // Changement d'app : on cache (ou réaffiche) la bulle tout de suite, sans attendre le prochain contrôle.
+            MainActor.assumeIsolated { self?.followField() }
+        }
+        NSWorkspace.shared.notificationCenter.addObserver(
+            forName: NSWorkspace.activeSpaceDidChangeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated { self?.followField() }
         }
         if let front = NSWorkspace.shared.frontmostApplication {
             AXText.enableAccessibility(for: front.processIdentifier)
@@ -92,9 +104,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func typingStarted() {
         task?.cancel()
         task = nil
-        if pending != nil { DiagLog.write("Bulle fermée : reprise de la frappe"); pending = nil; panel.hide() }
+        if pending != nil { DiagLog.write("Bulle fermée : reprise de la frappe"); pending = nil; stopFollowingField(); panel.hide() }
         guard Settings.enabled else { return }
         DiagLog.write("Frappe détectée")
+        if activity == nil {
+            activity = ProcessInfo.processInfo.beginActivity(
+                options: [.userInitiatedAllowingIdleSystemSleep, .latencyCritical], reason: "Correction en cours")
+        }
         setStatus(.typing)
         corrector.prewarm()
     }
@@ -137,13 +153,48 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 let frame = self.panel.show(original: text, corrected: corrected, near: anchor)
                 DiagLog.write("Bulle affichée : ancre \(anchor.map { "\($0)" } ?? "aucune (souris)"), cadre \(frame)")
                 self.setStatus(.suggestion)
+                self.startFollowingField()
             }
+        }
+    }
+
+    /// La bulle reste collée au champ : cachée quand on change d'app, d'onglet, de champ ou qu'on fait
+    /// défiler le champ hors de l'écran ; réaffichée (et replacée) quand on y revient.
+    private func startFollowingField() {
+        followTimer?.invalidate()
+        followTimer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.followField() }
+        }
+    }
+
+    private func stopFollowingField() {
+        followTimer?.invalidate()
+        followTimer = nil
+    }
+
+    private func followField() {
+        guard let p = pending, followTimer != nil else { return }
+        var visible = AXText.isStillFocused(p.field)
+        let anchor = visible ? AXText.anchorRect(p.field.element) : nil
+        if let a = anchor {
+            // Champ sorti de l'écran (défilement) ? Coordonnées AX (origine en haut à gauche) → écran AppKit.
+            let h = NSScreen.screens.first?.frame.height ?? 0
+            let r = CGRect(x: a.minX, y: h - a.maxY, width: max(a.width, 1), height: max(a.height, 1))
+            visible = NSScreen.screens.contains { $0.visibleFrame.intersects(r) }
+        }
+        if visible {
+            if !panel.isVisible { DiagLog.write("Bulle réaffichée : retour dans le champ") }
+            panel.reveal(near: anchor) // sans ancre lisible, la bulle reste où elle était
+        } else if panel.isVisible {
+            DiagLog.write("Bulle cachée : le champ n'a plus le focus ou n'est plus visible")
+            panel.conceal()
         }
     }
 
     private func acceptPending() {
         guard let p = pending else { return }
         pending = nil
+        stopFollowingField()
         panel.hide()
         guard NSWorkspace.shared.frontmostApplication?.processIdentifier == p.field.pid,
               AXText.currentText(p.field.element) == p.original else {
@@ -159,6 +210,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func dismissPending() {
         if pending != nil { DiagLog.write("Bulle fermée sans remplacer") }
         pending = nil
+        stopFollowingField()
         panel.hide()
         setStatus(.idle)
     }

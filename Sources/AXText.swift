@@ -52,6 +52,13 @@ enum AXText {
     }
 
     /// Pour le diagnostic : décrit l'élément qui a le focus.
+    /// Le champ est-il toujours celui qui a le focus (même app au premier plan, même élément) ?
+    static func isStillFocused(_ field: FocusedField) -> Bool {
+        guard NSWorkspace.shared.frontmostApplication?.processIdentifier == field.pid,
+              let el = element(attr(AXUIElementCreateApplication(field.pid), kAXFocusedUIElementAttribute)) else { return false }
+        return CFEqual(el, field.element)
+    }
+
     static func describeFocus() -> String {
         guard let app = NSWorkspace.shared.frontmostApplication else { return "pas d'app active" }
         let appEl = AXUIElementCreateApplication(app.processIdentifier)

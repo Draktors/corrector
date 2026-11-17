@@ -19,6 +19,10 @@ final class SuggestionPanel {
 
     private var panel: NSPanel?
     private var hideTimer: Timer?
+    private var hotKeysActive = false
+
+    /// La bulle est-elle affichée à l'écran (et pas seulement cachée en attendant le retour au champ) ?
+    var isVisible: Bool { panel?.isVisible ?? false }
 
     @discardableResult
     func show(original: String, corrected: String, near anchor: CGRect?) -> CGRect {
@@ -36,7 +40,9 @@ final class SuggestionPanel {
                             styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         p.isFloatingPanel = true
         p.level = .statusBar
-        p.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
+        // Pas de .canJoinAllSpaces : la bulle reste sur le bureau du champ, au lieu d'apparaître sur
+        // l'écran suivant pendant l'animation de changement de bureau.
+        p.collectionBehavior = [.fullScreenAuxiliary, .transient]
         p.backgroundColor = .clear
         p.isOpaque = false
         p.hasShadow = true
@@ -45,9 +51,7 @@ final class SuggestionPanel {
         p.setFrameOrigin(Self.origin(for: size, anchor: anchor))
         p.orderFrontRegardless()
         panel = p
-
-        HotKeys.shared.register(keyCode: kVK_Return, modifiers: cmdKey) { [weak self] in self?.onAccept?() }
-        HotKeys.shared.register(keyCode: kVK_Escape, modifiers: 0) { [weak self] in self?.onDismiss?() }
+        registerHotKeys()
         hideTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: false) { [weak self] _ in
             MainActor.assumeIsolated { self?.onDismiss?() }
         }
@@ -57,9 +61,40 @@ final class SuggestionPanel {
     func hide() {
         hideTimer?.invalidate()
         hideTimer = nil
-        HotKeys.shared.unregisterTemporary()
+        unregisterHotKeys()
         panel?.orderOut(nil)
         panel = nil
+    }
+
+    /// Cache la bulle sans l'oublier (l'utilisateur a quitté le champ). ⌘⏎ et Échap sont rendus aux autres apps.
+    func conceal() {
+        guard let panel, panel.isVisible else { return }
+        panel.orderOut(nil)
+        unregisterHotKeys()
+    }
+
+    /// Réaffiche la bulle au niveau du champ (retour dans le champ, ou champ déplacé : défilement, fenêtre…).
+    func reveal(near anchor: CGRect?) {
+        guard let panel else { return }
+        if let anchor {
+            let origin = Self.origin(for: panel.frame.size, anchor: anchor)
+            if panel.frame.origin != origin { panel.setFrameOrigin(origin) }
+        }
+        if !panel.isVisible { panel.orderFrontRegardless() }
+        registerHotKeys()
+    }
+
+    private func registerHotKeys() {
+        guard !hotKeysActive else { return }
+        hotKeysActive = true
+        HotKeys.shared.register(keyCode: kVK_Return, modifiers: cmdKey) { [weak self] in self?.onAccept?() }
+        HotKeys.shared.register(keyCode: kVK_Escape, modifiers: 0) { [weak self] in self?.onDismiss?() }
+    }
+
+    private func unregisterHotKeys() {
+        guard hotKeysActive else { return }
+        hotKeysActive = false
+        HotKeys.shared.unregisterTemporary()
     }
 
     /// `anchor` est en coordonnées AX (origine en haut à gauche de l'écran principal).
