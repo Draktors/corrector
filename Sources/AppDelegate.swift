@@ -51,8 +51,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.showMenuAtMouse()
         }
 
+        installEditMenu()
         ensurePermission()
         rebuildMenu()
+    }
+
+    /// Une app de barre de menus n'a pas de menu Édition : sans lui, ⌘V, ⌘C, ⌘X, ⌘A et ⌘Z ne font rien
+    /// dans ses champs (par exemple pour coller la clé API). Le menu reste invisible, seuls les raccourcis comptent.
+    private func installEditMenu() {
+        let edit = NSMenu(title: "Édition")
+        edit.addItem(withTitle: "Annuler", action: Selector(("undo:")), keyEquivalent: "z")
+        let redo = edit.addItem(withTitle: "Rétablir", action: Selector(("redo:")), keyEquivalent: "z")
+        redo.keyEquivalentModifierMask = [.command, .shift]
+        edit.addItem(.separator())
+        edit.addItem(withTitle: "Couper", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        edit.addItem(withTitle: "Copier", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        edit.addItem(withTitle: "Coller", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        edit.addItem(withTitle: "Tout sélectionner", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        let editItem = NSMenuItem(title: "Édition", action: nil, keyEquivalent: "")
+        editItem.submenu = edit
+        let main = NSMenu()
+        main.addItem(NSMenuItem(title: "Correcteur", action: nil, keyEquivalent: "")) // menu de l'app (requis en premier)
+        main.addItem(editItem)
+        NSApp.mainMenu = main
     }
 
     /// Relancer l'app (Spotlight, Launchpad, double-clic) alors qu'elle tourne déjà ouvre son menu.
