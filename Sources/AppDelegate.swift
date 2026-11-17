@@ -131,10 +131,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         DiagLog.write("Pause dans \(app) : correction de \(text.count) car. (web: \(field.isWeb)) via \(corrector.engineName)")
         setStatus(.checking)
+        // Seulement le passage où se trouve le curseur (paragraphe, ou phrase en cours si le paragraphe est long).
+        let range = Passage.around(caret: AXText.selection(field.element).map { $0.location }, in: text)
+        let passage = String(text[range])
+        if passage.count < text.count { DiagLog.write("Passage envoyé : \(passage.count) car. sur \(text.count)") }
+        let before = String(text[..<range.lowerBound]), after = String(text[range.upperBound...])
         let started = Date()
         task = Task { [weak self] in
             guard let self else { return }
-            let corrected = await self.corrector.correct(text)
+            let corrected = passage.contains(where: \.isLetter)
+                ? before + (await self.corrector.correct(passage)) + after
+                : text
             guard !Task.isCancelled else { DiagLog.write("Correction annulée (reprise de la frappe)"); return }
             self.lastHandled = text
             DiagLog.write(String(format: "Correction reçue en %.1fs, modifiée: %@", Date().timeIntervalSince(started), corrected != text ? "oui" : "non"))

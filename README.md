@@ -2,7 +2,9 @@
 
 Petite app pour la barre de menus du Mac, pensée pour toute personne qui fait des fautes en tapant vite.
 
-Elle repère quand tu écris. Dès que tu t'arrêtes de taper (0,5 s par défaut), elle relit ton texte et propose une correction : orthographe, fautes de frappe, grammaire, conjugaison, accords, apostrophes oubliées (jai → j'ai), homophones (a/à, sa/ça, ces/ses, on/ont…).
+Elle repère quand tu écris. Dès que tu t'arrêtes de taper (un quart de seconde par défaut), elle relit ton texte et propose une correction : orthographe, fautes de frappe, grammaire, conjugaison, accords, apostrophes oubliées (jai → j'ai), homophones (a/à, sa/ça, ces/ses, on/ont…).
+
+Elle ne relit que **le passage où tu écris** : le paragraphe en cours ou, s'il est long, la phrase en cours et la précédente. Sur un long message, c'est bien plus rapide que de tout renvoyer à chaque pause.
 
 Elle **ne reformule pas** : ton style, ton ton et tes mots restent les tiens, seules les fautes sont corrigées.
 
@@ -166,4 +168,5 @@ open build/Correcteur.app
 | `Sources/SuggestionPanel.swift` | bulle de correction et raccourcis |
 | `Sources/AppDelegate.swift` | barre de menus, réglages, enchaînement des étapes |
 | `Sources/WordDiff.swift` | différence mot à mot affichée dans la bulle |
+| `Sources/Passage.swift` | choisit le passage à corriger autour du curseur |
 | `Sources/Updater.swift` | menu « Mettre à jour » : `git pull`, `./build.sh`, relance |
