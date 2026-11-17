@@ -101,10 +101,10 @@ Pour faire réapparaître l'icône, maintiens **⌘** et fais-la glisser vers la
 
 - **Correction active** : met l'app en pause ou la réactive.
 - **Remplacer sans demander** : corrige directement, sans afficher la bulle.
-- **Corriger après une pause de…** : le temps d'attente après la dernière touche (de 500 ms à 4 s).
+- **Corriger après une pause de…** : le temps d'attente après la dernière touche (de 250 ms, par défaut, à 4 s ; plus long si la bulle apparaît trop souvent en pleine phrase).
 - **Moteur de correction** :
   - le moteur : Automatique, Apple Intelligence, Claude Code ou Claude API ;
-  - le **modèle**, séparément pour Claude Code (Haiku par défaut) et pour la clé API (Opus par défaut). Haiku est le plus rapide et le moins cher, Opus le plus puissant, Sonnet entre les deux ;
+  - le **modèle**, séparément pour Claude Code (Haiku par défaut) et pour la clé API (Haiku par défaut aussi). Haiku est le plus rapide et le moins cher, Opus le plus puissant, Sonnet entre les deux ;
   - **Ajouter / modifier la clé API Claude** : la clé est rangée dans le Trousseau macOS. Pour la supprimer, vide le champ et enregistre.
 - **Lancer au démarrage du Mac**.
 - **Mettre à jour (git pull + recompiler)** : seulement si l'app a été compilée depuis le code source (option B). Récupère la dernière version sur GitHub, recompile, puis relance l'app. En cas d'échec (pas de connexion, modifications locales dans le dossier du code…), une fenêtre montre l'erreur ; le détail est dans `~/Library/Logs/Correcteur-update.log`.

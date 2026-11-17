@@ -17,7 +17,7 @@ enum Settings {
 
     /// Temps sans frappe (en secondes) après lequel on considère que l'utilisateur a fini d'écrire.
     static var delay: Double {
-        get { let v = defaults.double(forKey: "delay"); return v > 0 ? v : 0.5 }
+        get { let v = defaults.double(forKey: "delay"); return v > 0 ? v : 0.25 }
         set { defaults.set(newValue, forKey: "delay") }
     }
 
@@ -58,7 +58,7 @@ enum Settings {
 
     /// Modèle utilisé par le moteur Claude API (Opus par défaut).
     static var apiModel: ClaudeModel {
-        get { ClaudeModel(rawValue: defaults.string(forKey: "apiModel") ?? "") ?? .opus }
+        get { ClaudeModel(rawValue: defaults.string(forKey: "apiModel") ?? "") ?? .haiku }
         set { defaults.set(newValue.rawValue, forKey: "apiModel") }
     }
 

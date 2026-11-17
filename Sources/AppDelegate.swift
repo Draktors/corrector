@@ -266,7 +266,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let delayItem = NSMenuItem(title: "Corriger après une pause de…", action: nil, keyEquivalent: "")
         let delayMenu = NSMenu()
-        for seconds in [0.5, 1.0, 1.5, 2.5, 4.0] {
+        for seconds in [0.25, 0.5, 1.0, 1.5, 2.5, 4.0] {
             let label = seconds < 1 ? "\(Int(seconds * 1000)) ms"
                 : seconds == 1 ? "1 seconde"
                 : String(format: "%g secondes", seconds).replacingOccurrences(of: ".", with: ",")
