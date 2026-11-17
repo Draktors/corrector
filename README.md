@@ -54,7 +54,7 @@ Il faut **Xcode 26** (App Store), ou au moins ses outils en ligne de commande po
 1. Récupère le code et compile l'app :
 
    ```bash
-   git clone git@github.com:Draktors/corrector.git
+   git clone git@github.com:EnzoHespel/corrector.git
    cd corrector
    ./build.sh
    ```
