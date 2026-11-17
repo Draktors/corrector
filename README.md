@@ -29,7 +29,7 @@ Une bulle s'affiche sous ton texte avec les corrections :
 
 | Moteur | Ce qu'il faut | Qualité | Vitesse | Coût | Confidentialité |
 |---|---|---|---|---|---|
-| **Claude Code** | Claude Code installé et connecté à ton abonnement Claude | très bonne | moins d'1 s | inclus dans l'abonnement | texte envoyé à Anthropic |
+| **Claude Code** | Claude Code installé et connecté à ton abonnement Claude | très bonne | environ 1,5 s | inclus dans l'abonnement | texte envoyé à Anthropic |
 | **Claude API** | une clé API (console.anthropic.com) | très bonne | environ 1 s | quelques centimes par mois | texte envoyé à Anthropic |
 | **Apple Intelligence** | Apple Intelligence activé (Réglages Système → Apple Intelligence et Siri) | moyenne : rate pas mal de fautes | moins d'1 s | gratuit | rien ne quitte le Mac |
 
@@ -161,7 +161,7 @@ open build/Correcteur.app
 | `Sources/TypingWatcher.swift` | détecte le début de la frappe et la pause |
 | `Sources/AXText.swift` | lit et remplace le texte du champ actif (Accessibilité, copier-coller pour le web) |
 | `Sources/Corrector.swift` | choix du moteur, consignes de correction, garde-fous contre les réécritures |
-| `Sources/ClaudeCodeClient.swift` | moteur Claude Code (`claude -p`, lancé à l'avance pendant la frappe) |
+| `Sources/ClaudeCodeClient.swift` | moteur Claude Code (`claude -p`) : deux processus lancés à l'avance, chaque texte envoyé aux deux, la première réponse gagne |
 | `Sources/ClaudeClient.swift` | moteur Claude API et stockage de la clé dans le Trousseau |
 | `Sources/SuggestionPanel.swift` | bulle de correction et raccourcis |
 | `Sources/AppDelegate.swift` | barre de menus, réglages, enchaînement des étapes |

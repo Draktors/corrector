@@ -218,6 +218,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Barre de menus
 
     private func setStatus(_ status: Status) {
+        // Fin du cycle frappe → correction : l'app peut de nouveau être mise en veille.
+        if status != .typing && status != .checking, let a = activity {
+            ProcessInfo.processInfo.endActivity(a)
+            activity = nil
+        }
         let symbol: String
         switch status {
         case .idle: symbol = "text.badge.checkmark"
